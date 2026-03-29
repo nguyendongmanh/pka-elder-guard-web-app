@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 from db.base import Base
 
 
@@ -9,3 +10,6 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     username = Column(String)
     hashed_password = Column(String)
+
+    devices = relationship("UserDevices", back_populates="user")
+    cameras = relationship("CameraWatch", back_populates="user")
