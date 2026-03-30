@@ -21,3 +21,13 @@ def save_player_id(db: Session, user_id: int, player_id: str):
 def get_player_ids_by_user(db: Session, user_id: int):
     devices = db.query(UserDevices).filter_by(user_id=user_id).all()
     return [d.player_id for d in devices]
+
+def delete_player_id(db: Session, player_id: str):
+    device = db.query(UserDevices).filter_by(player_id=player_id).first()
+
+    if device:
+        db.delete(device)
+        db.commit()
+        return True
+
+    return False
