@@ -6,39 +6,80 @@ load_dotenv()
 
 ONESIGNAL_APP_ID = os.getenv("ONESIGNAL_APP_ID")
 ONESIGNAL_API_KEY = os.getenv("ONESIGNAL_API_KEY")
+ONESIGNAL_NOTIFICATIONS_URL = "https://api.onesignal.com/notifications?c=push"
+REQUEST_TIMEOUT_SECONDS = 10
+
+
+def _build_headers():
+    return {
+        "Authorization": f"Key {ONESIGNAL_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+
+def _parse_response(res: requests.Response):
+    try:
+        return res.json()
+    except ValueError:
+        return {
+            "status_code": res.status_code,
+            "text": res.text
+        }
+
+
+def _ensure_configured():
+    missing_variables = []
+
+    if not ONESIGNAL_APP_ID:
+        missing_variables.append("ONESIGNAL_APP_ID")
+    if not ONESIGNAL_API_KEY:
+        missing_variables.append("ONESIGNAL_API_KEY")
+
+    if missing_variables:
+        missing = ", ".join(missing_variables)
+        raise RuntimeError(f"Missing OneSignal configuration: {missing}")
+
+
+def _post_notification(data: dict):
+    _ensure_configured()
+
+    res = requests.post(
+        ONESIGNAL_NOTIFICATIONS_URL,
+        headers=_build_headers(),
+        json=data,
+        timeout=REQUEST_TIMEOUT_SECONDS,
+    )
+    parsed = _parse_response(res)
+    if not isinstance(parsed, dict):
+        parsed = {"data": parsed}
+
+    parsed.setdefault("status_code", res.status_code)
+    if not res.ok:
+        details = parsed.get("errors") or parsed.get("text") or parsed
+        raise RuntimeError(
+            f"OneSignal request failed with status {res.status_code}: {details}"
+        )
+
+    return parsed
 
 
 def send_to_all(message: str):
-    url = "https://onesignal.com/api/v1/notifications"
-
-    headers = {
-        "Authorization": f"Basic {ONESIGNAL_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
     data = {
         "app_id": ONESIGNAL_APP_ID,
-        "included_segments": ["All"],
+        "target_channel": "push",
+        "included_segments": ["All Subscribers"],
         "contents": {"en": message}
     }
 
-    res = requests.post(url, headers=headers, json=data)
-    return res.json()
+    return _post_notification(data)
 
 
 def send_to_players(player_ids: list[str], message: str):
-    url = "https://onesignal.com/api/v1/notifications"
-
-    headers = {
-        "Authorization": f"Basic {ONESIGNAL_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
     data = {
         "app_id": ONESIGNAL_APP_ID,
-        "include_player_ids": player_ids,
+        "target_channel": "push",
+        "include_subscription_ids": player_ids,
         "contents": {"en": message}
     }
 
-    res = requests.post(url, headers=headers, json=data)
-    return res.json()
+    return _post_notification(data)

@@ -30,15 +30,16 @@ def login(
     db: Session = Depends(get_db)
 ):
 
-    token = login_user(
+    login_result = login_user(
         db,
         form_data.username,   # username ở trường hợp này là email
         form_data.password
     )
 
     return {
-        "access_token": token,
-        "token_type": "bearer"
+        "access_token": login_result["access_token"],
+        "token_type": "bearer",
+        "user_id": login_result["user_id"]
     }
 
 
