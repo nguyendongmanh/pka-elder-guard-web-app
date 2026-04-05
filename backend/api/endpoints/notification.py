@@ -4,6 +4,7 @@ from db.database import get_db
 from services.onesignal_service import send_to_all, send_to_players
 from services.device_service import delete_player_id, get_player_ids_by_user, save_player_id
 
+
 router = APIRouter(prefix="/notify", tags=["Notification"])
 
 

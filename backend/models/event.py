@@ -9,3 +9,4 @@ class Event(Base):
     timestamp = Column(DateTime)
     event_type = Column(String)
     confidence = Column(Float)
+    url = Column(String)

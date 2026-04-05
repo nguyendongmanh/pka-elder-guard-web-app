@@ -1,13 +1,9 @@
 from pydantic import BaseModel
 from datetime import datetime
 
-class EventCreate(BaseModel):
-    camera_id: int
+class LostEventCreate(BaseModel):
     timestamp: datetime
     event_type: str
-    confidence: float
-    url : str
-
-
-
-
+    anchor_url : str
+    current_url : str
+    distance: float
