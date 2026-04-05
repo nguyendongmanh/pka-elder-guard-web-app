@@ -8,6 +8,7 @@ ONESIGNAL_APP_ID = os.getenv("ONESIGNAL_APP_ID")
 ONESIGNAL_API_KEY = os.getenv("ONESIGNAL_API_KEY")
 ONESIGNAL_NOTIFICATIONS_URL = "https://api.onesignal.com/notifications?c=push"
 REQUEST_TIMEOUT_SECONDS = 10
+DEFAULT_BROADCAST_SEGMENT = "Active Subscriptions"
 
 
 def _build_headers():
@@ -60,6 +61,17 @@ def _post_notification(data: dict):
             f"OneSignal request failed with status {res.status_code}: {details}"
         )
 
+    errors = parsed.get("errors")
+    if errors:
+        raise RuntimeError(
+            f"OneSignal accepted the request but returned errors: {errors}"
+        )
+
+    if not parsed.get("id"):
+        raise RuntimeError(
+            f"OneSignal accepted the request but did not create a message: {parsed}"
+        )
+
     return parsed
 
 
@@ -67,7 +79,7 @@ def send_to_all(message: str):
     data = {
         "app_id": ONESIGNAL_APP_ID,
         "target_channel": "push",
-        "included_segments": ["All Subscribers"],
+        "included_segments": [DEFAULT_BROADCAST_SEGMENT],
         "contents": {"en": message}
     }
 
