@@ -75,23 +75,38 @@ def _post_notification(data: dict):
     return parsed
 
 
-def send_to_all(message: str):
-    data = {
+def send_to_all(message: str, heading: str | None = None, data: dict | None = None):
+    payload = {
         "app_id": ONESIGNAL_APP_ID,
         "target_channel": "push",
         "included_segments": [DEFAULT_BROADCAST_SEGMENT],
         "contents": {"en": message}
     }
 
-    return _post_notification(data)
+    if heading:
+        payload["headings"] = {"en": heading}
+    if data is not None:
+        payload["data"] = data
+
+    return _post_notification(payload)
 
 
-def send_to_players(player_ids: list[str], message: str):
-    data = {
+def send_to_players(
+    player_ids: list[str],
+    message: str,
+    heading: str | None = None,
+    data: dict | None = None,
+):
+    payload = {
         "app_id": ONESIGNAL_APP_ID,
         "target_channel": "push",
         "include_subscription_ids": player_ids,
         "contents": {"en": message}
     }
 
-    return _post_notification(data)
+    if heading:
+        payload["headings"] = {"en": heading}
+    if data is not None:
+        payload["data"] = data
+
+    return _post_notification(payload)
