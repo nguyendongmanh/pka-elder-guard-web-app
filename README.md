@@ -82,6 +82,13 @@ DATABASE_URL=postgresql://user:password@localhost:5432/elderguard
 SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+API_BASE_URL=https://jeane-unubiquitous-superprecariously.ngrok-free.dev/PKA_ElderGuard
+```
+
+You can also copy the prepared template:
+
+```bash
+copy .env.example .env
 ```
 
 **Run the backend:**
@@ -90,8 +97,35 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 uvicorn main:app --reload
 ```
 
-API available at `http://localhost:8000`
-Interactive docs at `http://localhost:8000/docs`
+If you run the backend locally with `uvicorn`, the dev server is available at `http://localhost:8000`
+Interactive docs are available at `http://localhost:8000/docs`
+
+### Backend URL config
+
+Backend now uses a single URL variable:
+
+```env
+API_BASE_URL=https://jeane-unubiquitous-superprecariously.ngrok-free.dev/PKA_ElderGuard
+```
+
+How it is used:
+
+- The path part is used as the FastAPI API prefix.
+- The full URL is published into the OpenAPI `servers` config.
+- Mobile should point to the same value via its own `API_BASE_URL`.
+
+Current default public URL:
+
+```text
+https://jeane-unubiquitous-superprecariously.ngrok-free.dev/PKA_ElderGuard
+```
+
+If you later move to another public domain:
+
+1. Edit `backend/.env` and change `API_BASE_URL` to the new public URL.
+2. Restart the backend process.
+3. Run the mobile app with `--dart-define=API_BASE_URL=<new-public-url>`.
+4. Re-test `POST /geofences` and `POST /events`.
 
 ### 3. Frontend setup
 
@@ -125,14 +159,44 @@ App available at `http://localhost:3000`
 
 ## API Endpoints
 
-Base prefix: `/PKA_ElderGuard`
+Base prefix: derived from `API_BASE_URL`
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `POST` | `/PKA_ElderGuard/auth/register` | Register a new account |
 | `POST` | `/PKA_ElderGuard/auth/login` | Login and receive JWT token |
+| `POST` | `/PKA_ElderGuard/geofences` | Create or update a geofence by `device_id` |
+| `POST` | `/PKA_ElderGuard/events` | Receive camera event payloads |
 
-> More endpoints will be added as backend development progresses.
+### Geofence payload
+
+Request:
+
+```json
+{
+  "device_id": "mobile-123",
+  "anchor_latitude": 10.776889,
+  "anchor_longitude": 106.700806,
+  "radius_meters": 150
+}
+```
+
+Response:
+
+```json
+{
+  "status": "created",
+  "geofence": {
+    "id": 1,
+    "device_id": "mobile-123",
+    "anchor_latitude": 10.776889,
+    "anchor_longitude": 106.700806,
+    "radius_meters": 150,
+    "created_at": "2026-04-07T09:30:00",
+    "updated_at": "2026-04-07T09:30:00"
+  }
+}
+```
 
 ## Development Notes
 
