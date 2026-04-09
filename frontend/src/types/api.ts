@@ -117,6 +117,40 @@ export interface RemoveDeviceResponse {
   error?: string;
 }
 
+export interface LocationUpdateRequest {
+  device_id: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface LocationCheckResult {
+  device_id: string;
+  latitude: number;
+  longitude: number;
+  anchor_latitude: number;
+  anchor_longitude: number;
+  distance_meters: number;
+  radius_meters: number;
+  is_safe: boolean;
+  message: string;
+}
+
+export interface LocationHistoryItem {
+  id: number;
+  device_id: string;
+  latitude: number;
+  longitude: number;
+  distance_meters: number | null;
+  is_safe: boolean;
+  created_at: string | null;
+}
+
+export interface LocationHistoryResponse {
+  device_id: string;
+  total: number;
+  locations: LocationHistoryItem[];
+}
+
 export interface ApiError {
   detail: string;
 }

@@ -4,6 +4,7 @@ from api.endpoints import event
 from api.endpoints import camera_watch
 from api.endpoints import geofence
 from api.endpoints import notification
+from api.endpoints import location
 
 api_router = APIRouter()
 
@@ -12,3 +13,4 @@ api_router.include_router(event.router)
 api_router.include_router(camera_watch.router)
 api_router.include_router(geofence.router)
 api_router.include_router(notification.router)
+api_router.include_router(location.router)
