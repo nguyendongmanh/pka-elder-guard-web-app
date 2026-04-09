@@ -6,7 +6,7 @@ class EventCreate(BaseModel):
     timestamp: datetime
     event_type: str
     confidence: float
-    url : str
+    url : str | None = None
 
 
 

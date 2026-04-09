@@ -29,10 +29,11 @@ async def recieve_event(data: EventCreate, db: Session = Depends(get_db)):
     db.add(db_event)
     db.commit()
 
-    if message:
+
+    if message and data.url is not None:
         try:
             push_result = send_to_all(
-                f"Cảnh báo: {data.event_type} tại camera {data.camera_id}"
+                f"Cảnh báo: {data.event_type} tại camera {data.camera_id} và có video đính kèm. Hãy kiểm tra ngay! URL: {data.url}"
             )
         except RuntimeError as error:
             raise HTTPException(
@@ -48,6 +49,12 @@ async def recieve_event(data: EventCreate, db: Session = Depends(get_db)):
                 "onesignal": push_result,
             },
         }
+    
+    if data.url is None:
+         push_result = send_to_all(
+                f"Cảnh báo: {data.event_type} tại camera {data.camera_id}"
+            )
+
 
     return {
         "status": "ok",
