@@ -14,9 +14,37 @@ from schemas.lost_event import LostEventCreate
 
 router = APIRouter()
 
+
+def _build_event_push_content(event_type: str, camera_id: int) -> tuple[str, str]:
+    normalized_event_type = event_type.strip().lower()
+
+    if normalized_event_type == "fall_detected":
+        return (
+            "Cảnh báo té ngã",
+            f"Phát hiện té ngã tại camera {camera_id}",
+        )
+
+    if normalized_event_type == "violence_detected":
+        return (
+            "Cảnh báo bạo lực",
+            f"Phát hiện bạo lực tại camera {camera_id}",
+        )
+
+    if normalized_event_type == "imobile_detected":
+        return (
+            "Cảnh báo bất động",
+            f"Phát hiện bất động tại camera {camera_id}",
+        )
+
+    return (
+        "Cảnh báo camera",
+        f"Phát hiện sự kiện {event_type} tại camera {camera_id}",
+    )
+
+
 @router.post("/events")
 async def recieve_event(data: EventCreate, db: Session = Depends(get_db)):
-    message = "đây là một sự kiện mới"
+    heading, message = _build_event_push_content(data.event_type, data.camera_id)
 
     db_event = Event(
         camera_id=data.camera_id,
@@ -28,6 +56,7 @@ async def recieve_event(data: EventCreate, db: Session = Depends(get_db)):
 
     db.add(db_event)
     db.commit()
+    db.refresh(db_event)
 
 
     if message and data.url is not None:
