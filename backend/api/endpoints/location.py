@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
+import requests as http_requests
 from sqlalchemy.orm import Session
 
 from crud.location_crud import save_location, get_location_history
@@ -14,6 +16,40 @@ from services.location_service import check_geofence
 from services.onesignal_service import send_to_all
 
 router = APIRouter(prefix="/locations", tags=["Location"])
+
+EXTERNAL_LOCATION_API = "http://54.206.94.56:8000/api/v1/location"
+
+
+class ExternalLocationPayload(BaseModel):
+    device_id: str
+    latitude: float
+    longitude: float
+
+
+@router.post("/forward")
+def forward_location(payload: ExternalLocationPayload):
+    try:
+        res = http_requests.post(
+            EXTERNAL_LOCATION_API,
+            json={
+                "device_id": payload.device_id,
+                "latitude": payload.latitude,
+                "longitude": payload.longitude,
+            },
+            timeout=10,
+        )
+        try:
+            body = res.json()
+        except ValueError:
+            body = {"raw": res.text}
+
+        return {
+            "status_code": res.status_code,
+            "ok": res.ok,
+            "data": body,
+        }
+    except http_requests.RequestException as e:
+        raise HTTPException(status_code=502, detail=str(e))
 
 
 @router.post("/update", response_model=LocationCheckResult)

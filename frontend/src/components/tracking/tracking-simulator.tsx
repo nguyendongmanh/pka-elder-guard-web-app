@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { apiClient } from "@/lib/api-client";
 
 const DEVICE_ID = "mobile-18";
-const EXTERNAL_API_URL = "http://54.206.94.56:8000/api/v1/location";
 
 const DEFAULT_ANCHOR_LAT = 10.762622;
 const DEFAULT_ANCHOR_LNG = 106.660172;
@@ -65,17 +65,12 @@ export function TrackingSimulator() {
       setIsSending(true);
       setLastError(null);
       try {
-        const res = await fetch(EXTERNAL_API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            device_id: DEVICE_ID,
-            latitude: lat,
-            longitude: lng,
-          }),
+        const res = await apiClient.post("/locations/forward", {
+          device_id: DEVICE_ID,
+          latitude: lat,
+          longitude: lng,
         });
-
-        const data = await res.json();
+        const data = res as Record<string, unknown>;
         setLastResponse(data);
         logIdRef.current += 1;
         setLogs((prev) => [
@@ -181,8 +176,8 @@ export function TrackingSimulator() {
                 <Input value={radius} onChange={(e) => setRadius(e.target.value)} />
               </div>
               <div className="bg-[#F8FAFC] rounded-lg p-3 text-xs text-[#64748B]">
-                <p>Endpoint: <code className="text-[#0D9488] font-mono">{EXTERNAL_API_URL}</code></p>
-                <p className="mt-1">Dữ liệu gửi: <code className="font-mono">{`{ device_id, latitude, longitude }`}</code></p>
+                <p>Server đích: <code className="text-[#0D9488] font-mono">http://54.206.94.56:8000/api/v1/location</code></p>
+                <p className="mt-1">Dữ liệu gửi: <code className="font-mono">{`{ device_id: "${DEVICE_ID}", latitude, longitude }`}</code></p>
               </div>
             </CardContent>
           </Card>
