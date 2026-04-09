@@ -102,37 +102,35 @@ export function TrackingSimulator() {
   return (
     <div className="flex flex-col gap-5 h-full min-h-0">
       <h1 className="text-xl font-bold text-[#0F172A] shrink-0">
-        Theo doi vi tri thiet bi deo tay
+        Theo dõi vị trí thiết bị đeo tay
       </h1>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 flex-1 min-h-0 overflow-auto">
-        {/* Left: Controls */}
         <div className="flex flex-col gap-4">
-          {/* Geofence Setup */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin size={16} className="text-[#0D9488]" />
-                Cau hinh vung an toan (Geofence)
+                Cấu hình vùng an toàn (Geofence)
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <div>
-                <label className="text-xs font-medium text-[#64748B]">Device ID</label>
+                <label className="text-xs font-medium text-[#64748B]">Mã thiết bị</label>
                 <Input value={deviceId} onChange={(e) => setDeviceId(e.target.value)} />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs font-medium text-[#64748B]">Vi tri moc (Lat)</label>
+                  <label className="text-xs font-medium text-[#64748B]">Vị trí mốc (Vĩ độ)</label>
                   <Input value={anchorLat} onChange={(e) => setAnchorLat(e.target.value)} />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-[#64748B]">Vi tri moc (Lng)</label>
+                  <label className="text-xs font-medium text-[#64748B]">Vị trí mốc (Kinh độ)</label>
                   <Input value={anchorLng} onChange={(e) => setAnchorLng(e.target.value)} />
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-[#64748B]">Ban kinh an toan (m)</label>
+                <label className="text-xs font-medium text-[#64748B]">Bán kính an toàn (mét)</label>
                 <Input value={radius} onChange={(e) => setRadius(e.target.value)} />
               </div>
               <Button
@@ -140,32 +138,31 @@ export function TrackingSimulator() {
                 disabled={createGeofence.isPending}
                 className="w-full bg-[#0D9488] hover:bg-teal-700 text-white"
               >
-                {createGeofence.isPending ? "Dang tao..." : "Tao/Cap nhat Geofence"}
+                {createGeofence.isPending ? "Đang tạo..." : "Tạo / Cập nhật vùng an toàn"}
               </Button>
               {createGeofence.isSuccess && (
                 <p className="text-xs text-green-600">
-                  Geofence {createGeofence.data.status} thanh cong!
+                  Vùng an toàn đã được {createGeofence.data.status === "created" ? "tạo" : "cập nhật"} thành công!
                 </p>
               )}
             </CardContent>
           </Card>
 
-          {/* Device Location */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Send size={16} className="text-[#0D9488]" />
-                Gia lap vi tri thiet bi
+                Giả lập vị trí thiết bị
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs font-medium text-[#64748B]">Latitude</label>
+                  <label className="text-xs font-medium text-[#64748B]">Vĩ độ thiết bị</label>
                   <Input value={deviceLat} onChange={(e) => setDeviceLat(e.target.value)} />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-[#64748B]">Longitude</label>
+                  <label className="text-xs font-medium text-[#64748B]">Kinh độ thiết bị</label>
                   <Input value={deviceLng} onChange={(e) => setDeviceLng(e.target.value)} />
                 </div>
               </div>
@@ -176,7 +173,7 @@ export function TrackingSimulator() {
                   className="flex-1 bg-[#0D9488] hover:bg-teal-700 text-white"
                 >
                   <Send size={14} />
-                  Gui vi tri
+                  Gửi vị trí
                 </Button>
               </div>
               <div className="flex gap-2">
@@ -187,37 +184,35 @@ export function TrackingSimulator() {
                 >
                   {isSimulating ? (
                     <>
-                      <Square size={14} /> Dung gia lap
+                      <Square size={14} /> Dừng giả lập
                     </>
                   ) : (
                     <>
-                      <Play size={14} /> Bat dau gia lap
+                      <Play size={14} /> Bắt đầu giả lập
                     </>
                   )}
                 </Button>
-                <Button onClick={() => setDirection((d) => -d)} variant="outline" title="Doi huong di">
+                <Button onClick={() => setDirection((d) => -d)} variant="outline" title="Đổi hướng di chuyển">
                   <RotateCcw size={14} />
                 </Button>
-                <Button onClick={handleReset} variant="outline" title="Reset">
+                <Button onClick={handleReset} variant="outline" title="Đặt lại">
                   <RotateCcw size={14} />
                 </Button>
               </div>
               {isSimulating && (
                 <div className="flex items-center gap-2 text-xs text-[#64748B]">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  Dang gia lap - thiet bi di chuyen {direction > 0 ? "ve phia dong" : "ve phia tay"}...
+                  Đang giả lập — thiết bị di chuyển {direction > 0 ? "về phía đông" : "về phía Tây"}...
                 </div>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Center: Status + Visual Map */}
         <div className="flex flex-col gap-4">
-          {/* Status Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Trang thai hien tai</CardTitle>
+              <CardTitle>Trạng thái hiện tại</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {lastResult ? (
@@ -239,28 +234,28 @@ export function TrackingSimulator() {
                           lastResult.is_safe ? "text-green-700" : "text-red-700"
                         }`}
                       >
-                        {lastResult.is_safe ? "AN TOAN" : "CANH BAO"}
+                        {lastResult.is_safe ? "AN TOÀN" : "CẢNH BÁO"}
                       </span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="bg-[#F8FAFC] rounded-lg p-3">
-                      <p className="text-[#64748B] text-xs">Khoang cach</p>
+                      <p className="text-[#64748B] text-xs">Khoảng cách</p>
                       <p className="font-bold text-[#0F172A]">{lastResult.distance_meters.toFixed(1)}m</p>
                     </div>
                     <div className="bg-[#F8FAFC] rounded-lg p-3">
-                      <p className="text-[#64748B] text-xs">Gioi han</p>
+                      <p className="text-[#64748B] text-xs">Giới hạn</p>
                       <p className="font-bold text-[#0F172A]">{lastResult.radius_meters}m</p>
                     </div>
                     <div className="bg-[#F8FAFC] rounded-lg p-3">
-                      <p className="text-[#64748B] text-xs">Vi tri thiet bi</p>
+                      <p className="text-[#64748B] text-xs">Vị trí thiết bị</p>
                       <p className="font-bold text-[#0F172A] text-xs">
                         {lastResult.latitude.toFixed(6)}, {lastResult.longitude.toFixed(6)}
                       </p>
                     </div>
                     <div className="bg-[#F8FAFC] rounded-lg p-3">
-                      <p className="text-[#64748B] text-xs">Vi tri moc</p>
+                      <p className="text-[#64748B] text-xs">Vị trí mốc</p>
                       <p className="font-bold text-[#0F172A] text-xs">
                         {lastResult.anchor_latitude.toFixed(6)}, {lastResult.anchor_longitude.toFixed(6)}
                       </p>
@@ -269,23 +264,22 @@ export function TrackingSimulator() {
 
                   {!lastResult.is_safe && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 text-center font-medium">
-                      THIET BI DA RA NGOAI VUNG AN TOAN!
+                      THIẾT BỊ ĐÃ RA NGOÀI VÙNG AN TOÀN!
                     </div>
                   )}
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center p-8 text-[#64748B]">
                   <MapPin size={48} className="opacity-30 mb-2" />
-                  <p className="text-sm">Chua co du lieu. Gui vi tri de kiem tra.</p>
+                  <p className="text-sm">Chưa có dữ liệu. Gửi vị trí để kiểm tra.</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Visual Map */}
           <Card className="flex-1 min-h-[300px]">
             <CardHeader>
-              <CardTitle>Ban do vi tri</CardTitle>
+              <CardTitle>Bản đồ vị trí</CardTitle>
             </CardHeader>
             <CardContent>
               <LocationMap
@@ -301,13 +295,12 @@ export function TrackingSimulator() {
           </Card>
         </div>
 
-        {/* Right: History */}
         <Card className="flex flex-col min-h-0">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>Lich su vi tri</span>
+              <span>Lịch sử vị trí</span>
               {recentUnsafe.length > 0 && (
-                <Badge variant="destructive">{recentUnsafe.length} canh bao</Badge>
+                <Badge variant="destructive">{recentUnsafe.length} cảnh báo</Badge>
               )}
             </CardTitle>
           </CardHeader>
@@ -315,7 +308,7 @@ export function TrackingSimulator() {
             <div className="space-y-2">
               {locations.length === 0 ? (
                 <p className="text-sm text-[#64748B] text-center py-8">
-                  Chua co lich su vi tri
+                  Chưa có lịch sử vị trí
                 </p>
               ) : (
                 locations.map((loc) => (
@@ -338,14 +331,14 @@ export function TrackingSimulator() {
                           {loc.latitude.toFixed(6)}, {loc.longitude.toFixed(6)}
                         </span>
                         <Badge variant={loc.is_safe ? "default" : "destructive"} className="text-[10px] px-1.5">
-                          {loc.is_safe ? "An toan" : "Ngoai vung"}
+                          {loc.is_safe ? "An toàn" : "Ngoài vùng"}
                         </Badge>
                       </div>
                       <p className="text-xs text-[#64748B] mt-0.5">
                         {loc.distance_meters != null
                           ? `${loc.distance_meters.toFixed(1)}m`
                           : ""}{" "}
-                        - {loc.created_at ? new Date(loc.created_at).toLocaleTimeString("vi-VN") : ""}
+                        — {loc.created_at ? new Date(loc.created_at).toLocaleTimeString("vi-VN") : ""}
                       </p>
                     </div>
                   </div>
@@ -418,7 +411,7 @@ function LocationMap({
           fill="#0D9488"
         />
         <text x={toX(anchorLng)} y={toY(anchorLat) - 2} textAnchor="middle" fontSize="2.5" fill="#0D9488" fontWeight="bold">
-          Moc
+          Mốc
         </text>
 
         {locations.slice(0, 10).map((loc, i) => (
@@ -456,15 +449,15 @@ function LocationMap({
 
       <div className="absolute bottom-2 left-2 flex gap-3 text-[10px] text-[#64748B]">
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-[#0D9488] rounded-full" /> Moc
+          <span className="w-2 h-2 bg-[#0D9488] rounded-full" /> Mốc
         </span>
         <span className="flex items-center gap-1">
           <span className={`w-2 h-2 ${isSafe ? "bg-green-500" : "bg-red-500"} rounded-full`} />
-          Thiet bi
+          Thiết bị
         </span>
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 border border-[#0D9488] bg-[#0D9488]/10 rounded-full" />
-          Vung an toan
+          Vùng an toàn
         </span>
       </div>
     </div>

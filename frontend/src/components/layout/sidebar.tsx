@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/patients", label: "Patient List", icon: Users },
-  { href: "/tracking", label: "Location Tracking", icon: MapPin },
+  { href: "/tracking", label: "Theo dõi vị trí", icon: MapPin },
   { href: "/messages", label: "Messages", icon: MessageSquare },
   { href: "/reports", label: "Reports", icon: FileText },
 ];
