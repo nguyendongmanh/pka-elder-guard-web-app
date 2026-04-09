@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Eye, EyeOff, ShieldCheck, LogOut, MonitorSmartphone } from "lucide-react";
 import { SettingsField, SettingsSectionBlock, INPUT_CLASS, Toggle } from "@/components/settings/settings-field";
 import { cn } from "@/lib/utils";
+import { useChangePassword } from "@/hooks/use-auth";
+import { useAuthStore } from "@/stores/auth-store";
 
 const ACTIVE_SESSIONS = [
   { id: "1", device: "Chrome — macOS",       location: "Ho Chi Minh City, VN", time: "Active now",    current: true  },
@@ -17,14 +19,56 @@ export function SecuritySection() {
   const [showConfirm, setShowConfirm]   = useState(false);
   const [twoFactor, setTwoFactor]       = useState(true);
   const [saved, setSaved]               = useState(false);
+  const [errorMsg, setErrorMsg]         = useState("");
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword]         = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const changePasswordMutation = useChangePassword();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  function handleChangePassword() {
+    setErrorMsg("");
+
+    if (newPassword !== confirmPassword) {
+      setErrorMsg("New passwords do not match");
+      return;
+    }
+
+    changePasswordMutation.mutate(
+      { old_password: currentPassword, new_password: newPassword },
+      {
+        onSuccess: (res) => {
+          if (res.error) {
+            setErrorMsg(res.error);
+            return;
+          }
+          setSaved(true);
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+          setTimeout(() => setSaved(false), 2500);
+        },
+        onError: (err) => {
+          setErrorMsg(err.message);
+        },
+      },
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Change password */}
       <SettingsSectionBlock title="Change Password" description="Use a strong password of at least 12 characters.">
         <SettingsField label="Current Password">
           <div className="relative">
-            <input type={showCurrent ? "text" : "password"} className={INPUT_CLASS} placeholder="Enter current password" />
+            <input
+              type={showCurrent ? "text" : "password"}
+              className={INPUT_CLASS}
+              placeholder="Enter current password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+            />
             <button type="button" onClick={() => setShowCurrent((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#64748B]" aria-label="Toggle visibility">
               {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -32,7 +76,13 @@ export function SecuritySection() {
         </SettingsField>
         <SettingsField label="New Password" hint="Min. 12 characters, including uppercase, number & symbol.">
           <div className="relative">
-            <input type={showNew ? "text" : "password"} className={INPUT_CLASS} placeholder="Enter new password" />
+            <input
+              type={showNew ? "text" : "password"}
+              className={INPUT_CLASS}
+              placeholder="Enter new password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
             <button type="button" onClick={() => setShowNew((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#64748B]" aria-label="Toggle visibility">
               {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -40,18 +90,34 @@ export function SecuritySection() {
         </SettingsField>
         <SettingsField label="Confirm New Password">
           <div className="relative">
-            <input type={showConfirm ? "text" : "password"} className={INPUT_CLASS} placeholder="Repeat new password" />
+            <input
+              type={showConfirm ? "text" : "password"}
+              className={INPUT_CLASS}
+              placeholder="Repeat new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
             <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#64748B]" aria-label="Toggle visibility">
               {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
         </SettingsField>
+        {errorMsg && (
+          <div className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+            {errorMsg}
+          </div>
+        )}
         <div className="flex justify-end">
           <button
-            onClick={() => { setSaved(true); setTimeout(() => setSaved(false), 2500); }}
-            className={cn("px-5 py-2 rounded-xl text-sm font-semibold text-white transition-colors", saved ? "bg-green-500" : "bg-[#0D9488] hover:bg-teal-700")}
+            onClick={handleChangePassword}
+            disabled={changePasswordMutation.isPending || !isAuthenticated}
+            className={cn(
+              "px-5 py-2 rounded-xl text-sm font-semibold text-white transition-colors",
+              saved ? "bg-green-500" : "bg-[#0D9488] hover:bg-teal-700",
+              (changePasswordMutation.isPending || !isAuthenticated) && "opacity-50 cursor-not-allowed",
+            )}
           >
-            {saved ? "Updated!" : "Update Password"}
+            {changePasswordMutation.isPending ? "Updating..." : saved ? "Updated!" : "Update Password"}
           </button>
         </div>
       </SettingsSectionBlock>
