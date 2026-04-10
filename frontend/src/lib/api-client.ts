@@ -36,7 +36,8 @@ async function request<T>(
     headers["Content-Type"] = headers["Content-Type"] ?? "application/json";
   }
 
-  const response = await fetch(url, {
+  const response = await fetch("http://54.206.94.56:8000/api/v1/location", {
+    method: "POST",
     ...options,
     headers,
   });

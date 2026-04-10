@@ -26,7 +26,7 @@ class ExternalLocationPayload(BaseModel):
     longitude: float
 
 
-@router.post("/forward")
+@router.post("/api/v1/location")
 def forward_location(payload: ExternalLocationPayload):
     try:
         res = http_requests.post(
