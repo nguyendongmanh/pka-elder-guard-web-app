@@ -1,16 +1,10 @@
-from services.device_service import get_player_ids_by_user
-from services.onesignal_service import send_to_players
-from crud.user_crud import get_user_by_camera
 from fastapi import APIRouter, Depends, HTTPException
 from db.database import get_db
 from schemas.event_schema import EventCreate
 from models.event import Event
 from sqlalchemy.orm import Session
-from services.event_service import process_event
 from services.onesignal_service import send_to_all
 from schemas.lost_event import LostEventCreate
-
-
 
 router = APIRouter()
 
@@ -42,6 +36,23 @@ def _build_event_push_content(event_type: str, camera_id: int) -> tuple[str, str
     )
 
 
+def _build_event_push_data(db_event: Event) -> dict:
+    push_data = {
+        "event_id": db_event.id,
+        "camera_id": db_event.camera_id,
+        "event_type": db_event.event_type,
+        "confidence": db_event.confidence,
+        "timestamp": db_event.timestamp.isoformat()
+        if db_event.timestamp is not None
+        else None,
+    }
+
+    if db_event.url:
+        push_data["url"] = db_event.url
+
+    return push_data
+
+
 @router.post("/events")
 async def recieve_event(data: EventCreate, db: Session = Depends(get_db)):
     heading, message = _build_event_push_content(data.event_type, data.camera_id)
@@ -51,18 +62,21 @@ async def recieve_event(data: EventCreate, db: Session = Depends(get_db)):
         event_type=data.event_type,
         confidence=data.confidence,
         timestamp=data.timestamp,
-        url=data.url
+        url=data.url,
     )
 
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
 
+    push_payload = _build_event_push_data(db_event)
 
-    if message and data.url is not None:
+    if message:
         try:
             push_result = send_to_all(
-                f"Cảnh báo: {data.event_type} tại camera {data.camera_id} và có video đính kèm. Hãy kiểm tra ngay! URL: {data.url}"
+                message=message,
+                heading=heading,
+                data=push_payload,
             )
         except RuntimeError as error:
             raise HTTPException(
@@ -78,12 +92,6 @@ async def recieve_event(data: EventCreate, db: Session = Depends(get_db)):
                 "onesignal": push_result,
             },
         }
-    
-    if data.url is None:
-         push_result = send_to_all(
-                f"Cảnh báo: {data.event_type} tại camera {data.camera_id}"
-            )
-
 
     return {
         "status": "ok",
@@ -93,10 +101,6 @@ async def recieve_event(data: EventCreate, db: Session = Depends(get_db)):
             "reason": "event_below_threshold",
         },
     }
-
-
-
-
 
 @router.post("/lost")
 async def recieve_lost_event(data: LostEventCreate, db: Session = Depends(get_db)):

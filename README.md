@@ -198,6 +198,27 @@ Response:
 }
 ```
 
+### Event payload
+
+Request:
+
+```json
+{
+  "camera_id": 3,
+  "timestamp": "2026-04-10T19:30:00",
+  "event_type": "fall_detected",
+  "confidence": 0.97,
+  "url": "https://server.example/videos/events/123.mp4"
+}
+```
+
+Push behavior:
+
+- The visible notification text stays human-readable, for example `Phát hiện té ngã tại camera 3`.
+- The backend forwards structured metadata in OneSignal `data`.
+- If `url` is present in the request, the backend includes it as `data.url` instead of appending the link to the notification body.
+- Mobile can use `data.url` as a deep link or external URL target when the user taps the notification.
+
 ## Development Notes
 
 - The frontend currently uses **mock data** (`src/lib/mock-*.ts`) — no live API calls are made yet.
